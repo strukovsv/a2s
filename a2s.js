@@ -2,6 +2,12 @@
 (function() {
 'use strict';
 
+var debug_a2s = false;
+
+function log(msg) {
+    console.log(msg);
+}
+
 function F2(fun)
 {
   function wrapper(a) { return function(b) { return fun(a,b); }; }
@@ -8688,13 +8694,23 @@ var _user$project$Grid$arrowUp = _elm_lang$core$Native_List.fromArray(
 var _user$project$Grid$isArrowUp = function ($char) {
 	return A2(_elm_lang$core$List$member, $char, _user$project$Grid$arrowUp);
 };
+
 var _user$project$Grid$arrowLeft = _elm_lang$core$Native_List.fromArray(
 	[
-		_elm_lang$core$Native_Utils.chr('<')
+		_elm_lang$core$Native_Utils.chr('{')
 	]);
 var _user$project$Grid$isArrowLeft = function ($char) {
 	return A2(_elm_lang$core$List$member, $char, _user$project$Grid$arrowLeft);
 };
+
+var _user$project$Grid$Asterisk = _elm_lang$core$Native_List.fromArray(
+	[
+		_elm_lang$core$Native_Utils.chr('*')
+	]);
+var _user$project$Grid$isAsterisk = function ($char) {
+	return A2(_elm_lang$core$List$member, $char, _user$project$Grid$Asterisk);
+};
+
 var _user$project$Grid$arrowDown = _elm_lang$core$Native_List.fromArray(
 	[
 		_elm_lang$core$Native_Utils.chr('V'),
@@ -8705,7 +8721,7 @@ var _user$project$Grid$isArrowDown = function ($char) {
 };
 var _user$project$Grid$arrowRight = _elm_lang$core$Native_List.fromArray(
 	[
-		_elm_lang$core$Native_Utils.chr('>')
+		_elm_lang$core$Native_Utils.chr('}')
 	]);
 var _user$project$Grid$isArrowRight = function ($char) {
 	return A2(_elm_lang$core$List$member, $char, _user$project$Grid$arrowRight);
@@ -8768,6 +8784,7 @@ var _user$project$Grid$measureX = function (x) {
 	return _elm_lang$core$Basics$toFloat(x) * _user$project$Grid$textWidth;
 };
 var _user$project$Grid$lineWidth = 1.0;
+var _user$project$Grid$lineWidthTriangle = 1.5;
 var _user$project$Grid$drawArc = F5(
 	function (startX, startY, endX, endY, radius) {
 		var ry = radius;
@@ -8797,6 +8814,38 @@ var _user$project$Grid$drawArc = F5(
 					_elm_lang$svg$Svg_Attributes$stroke('black'),
 					_elm_lang$svg$Svg_Attributes$strokeWidth(
 					_elm_lang$core$Basics$toString(_user$project$Grid$lineWidth)),
+					_elm_lang$svg$Svg_Attributes$fill('transparent')
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[]));
+	});
+var _user$project$Grid$drawCircle = F4(
+	function (startX, startY, radius, stroke) {
+		var paths = A2(
+			_elm_lang$core$String$join,
+			' ',
+			_elm_lang$core$Native_List.fromArray(
+				[
+					'M',
+					_elm_lang$core$Basics$toString(startX + radius - 1),
+					_elm_lang$core$Basics$toString(startY - radius + 1),
+					'A',
+					_elm_lang$core$Basics$toString(radius),
+					_elm_lang$core$Basics$toString(radius),
+					'0',
+					'1',
+					'1',
+					_elm_lang$core$Basics$toString(startX + radius - 1.01),
+					_elm_lang$core$Basics$toString(startY - radius + 0.99)
+				]));
+		return A2(
+			_elm_lang$svg$Svg$path,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$svg$Svg_Attributes$d(paths),
+					_elm_lang$svg$Svg_Attributes$stroke('black'),
+					_elm_lang$svg$Svg_Attributes$strokeWidth(
+					_elm_lang$core$Basics$toString(stroke)),
 					_elm_lang$svg$Svg_Attributes$fill('transparent')
 				]),
 			_elm_lang$core$Native_List.fromArray(
@@ -8845,6 +8894,15 @@ var _user$project$Grid$drawCloseCurve = F3(
 		return _elm_lang$core$Native_List.fromArray(
 			[
 				A5(_user$project$Grid$drawArc, startX, startY, endX, endY, radius)
+			]);
+	});
+var _user$project$Grid$drawCircleBlack = F2(
+	function (x, y) {
+		var startY = _user$project$Grid$measureY(y) + (_user$project$Grid$textHeight / 2);
+		var startX = _user$project$Grid$measureX(x) + (_user$project$Grid$textWidth / 2);
+		return _elm_lang$core$Native_List.fromArray(
+			[
+				A4(_user$project$Grid$drawCircle, startX, startY, 2, 4)
 			]);
 	});
 var _user$project$Grid$drawTopLeftBigCurve = F2(
@@ -8926,9 +8984,9 @@ var _user$project$Grid$drawArrowRight = F3(
 			_elm_lang$core$Native_List.fromArray(
 				[
 					_elm_lang$svg$Svg_Attributes$x1(
-					_elm_lang$core$Basics$toString(startX)),
+					_elm_lang$core$Basics$toString(startX - 2)),
 					_elm_lang$svg$Svg_Attributes$x2(
-					_elm_lang$core$Basics$toString(endX)),
+					_elm_lang$core$Basics$toString(endX - 2)),
 					_elm_lang$svg$Svg_Attributes$y1(
 					_elm_lang$core$Basics$toString(startY)),
 					_elm_lang$svg$Svg_Attributes$y2(
@@ -8943,7 +9001,7 @@ var _user$project$Grid$drawArrowRight = F3(
 							A2(
 								_elm_lang$core$Basics_ops['++'],
 								';stroke-width:',
-								_elm_lang$core$Basics$toString(_user$project$Grid$lineWidth))))),
+								_elm_lang$core$Basics$toString(_user$project$Grid$lineWidthTriangle))))),
 					_elm_lang$svg$Svg_Attributes$markerEnd('url(#triangle)')
 				]),
 			_elm_lang$core$Native_List.fromArray(
@@ -8984,9 +9042,9 @@ var _user$project$Grid$drawArrowLeft = F3(
 			_elm_lang$core$Native_List.fromArray(
 				[
 					_elm_lang$svg$Svg_Attributes$x1(
-					_elm_lang$core$Basics$toString(startX)),
+					_elm_lang$core$Basics$toString(startX + 2)),
 					_elm_lang$svg$Svg_Attributes$x2(
-					_elm_lang$core$Basics$toString(endX)),
+					_elm_lang$core$Basics$toString(endX + 2)),
 					_elm_lang$svg$Svg_Attributes$y1(
 					_elm_lang$core$Basics$toString(startY)),
 					_elm_lang$svg$Svg_Attributes$y2(
@@ -9001,7 +9059,7 @@ var _user$project$Grid$drawArrowLeft = F3(
 							A2(
 								_elm_lang$core$Basics_ops['++'],
 								';stroke-width:',
-								_elm_lang$core$Basics$toString(_user$project$Grid$lineWidth))))),
+								_elm_lang$core$Basics$toString(_user$project$Grid$lineWidthTriangle))))),
 					_elm_lang$svg$Svg_Attributes$markerEnd('url(#triangle)')
 				]),
 			_elm_lang$core$Native_List.fromArray(
@@ -9046,9 +9104,9 @@ var _user$project$Grid$drawArrowDown = F3(
 					_elm_lang$svg$Svg_Attributes$x2(
 					_elm_lang$core$Basics$toString(endX)),
 					_elm_lang$svg$Svg_Attributes$y1(
-					_elm_lang$core$Basics$toString(startY)),
+					_elm_lang$core$Basics$toString(startY - 2)),
 					_elm_lang$svg$Svg_Attributes$y2(
-					_elm_lang$core$Basics$toString(endY)),
+					_elm_lang$core$Basics$toString(endY - 2)),
 					_elm_lang$svg$Svg_Attributes$style(
 					A2(
 						_elm_lang$core$Basics_ops['++'],
@@ -9059,7 +9117,7 @@ var _user$project$Grid$drawArrowDown = F3(
 							A2(
 								_elm_lang$core$Basics_ops['++'],
 								';stroke-width:',
-								_elm_lang$core$Basics$toString(_user$project$Grid$lineWidth))))),
+								_elm_lang$core$Basics$toString(_user$project$Grid$lineWidthTriangle))))),
 					_elm_lang$svg$Svg_Attributes$markerEnd('url(#triangle)')
 				]),
 			_elm_lang$core$Native_List.fromArray(
@@ -9220,9 +9278,9 @@ var _user$project$Grid$drawArrowUp = F3(
 					_elm_lang$svg$Svg_Attributes$x2(
 					_elm_lang$core$Basics$toString(endX)),
 					_elm_lang$svg$Svg_Attributes$y1(
-					_elm_lang$core$Basics$toString(startY)),
+					_elm_lang$core$Basics$toString(startY + 2)),
 					_elm_lang$svg$Svg_Attributes$y2(
-					_elm_lang$core$Basics$toString(endY)),
+					_elm_lang$core$Basics$toString(endY + 2)),
 					_elm_lang$svg$Svg_Attributes$style(
 					A2(
 						_elm_lang$core$Basics_ops['++'],
@@ -9233,7 +9291,7 @@ var _user$project$Grid$drawArrowUp = F3(
 							A2(
 								_elm_lang$core$Basics_ops['++'],
 								';stroke-width:',
-								_elm_lang$core$Basics$toString(_user$project$Grid$lineWidth))))),
+								_elm_lang$core$Basics$toString(_user$project$Grid$lineWidthTriangle))))),
 					_elm_lang$svg$Svg_Attributes$markerEnd('url(#triangle)')
 				]),
 			_elm_lang$core$Native_List.fromArray(
@@ -10085,7 +10143,7 @@ var _user$project$Grid$fontSize = 14.0;
 var _user$project$Grid$drawText = F3(
 	function (x$, y$, $char) {
 		var y$$ = _user$project$Grid$measureY(y$) + ((_user$project$Grid$textHeight * 3) / 4);
-		var x$$ = _user$project$Grid$measureX(x$) - (_user$project$Grid$textWidth / 4);
+		var x$$ = _user$project$Grid$measureX(x$) - (_user$project$Grid$textWidth / 4) + 1.7 ;
 		return A2(
 			_elm_lang$svg$Svg$text$,
 			_elm_lang$core$Native_List.fromArray(
@@ -10101,7 +10159,7 @@ var _user$project$Grid$drawText = F3(
 						A2(
 							_elm_lang$core$Basics_ops['++'],
 							_elm_lang$core$Basics$toString(_user$project$Grid$fontSize),
-							'px;font-family:monospace')))
+							'px;font-family: monospace')))
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[
@@ -10155,6 +10213,7 @@ var _user$project$Grid$OpenCurve = {ctor: 'OpenCurve'};
 var _user$project$Grid$SlantLeft = {ctor: 'SlantLeft'};
 var _user$project$Grid$SlantRight = {ctor: 'SlantRight'};
 var _user$project$Grid$ArrowWest = {ctor: 'ArrowWest'};
+var _user$project$Grid$CircleBlack = {ctor: 'CircleBlack'};
 var _user$project$Grid$ArrowNorthEast = {ctor: 'ArrowNorthEast'};
 var _user$project$Grid$ArrowNorthWest = {ctor: 'ArrowNorthWest'};
 var _user$project$Grid$ArrowNorth = {ctor: 'ArrowNorth'};
@@ -10198,11 +10257,24 @@ var _user$project$Grid$getElement = F3(
 		var top = A3(_user$project$Grid$topOf, x, y, model);
 		var $char = A3(_user$project$Grid$get, x, y, model);
 		var _p13 = $char;
+		if (debug_a2s) {
+   	        log('');
+   	        log(topLeft._0    + ' :: ' + top._0    + ' :: ' + topRight._0);
+   	        log(left._0       + ' :: ' + $char._0  + ' :: ' + right._0);
+   	        log(bottomLeft._0 + ' :: ' + bottom._0 + ' :: ' + bottomRight._0);
+		}
 		if (_p13.ctor === 'Just') {
 			var _p14 = _p13._0;
-			if (_user$project$Grid$isVertical(_p14) && (_elm_lang$core$Basics$not(
-				A2(_user$project$Grid$isNeighbor, left, _user$project$Grid$isAlphaNumeric)) && _elm_lang$core$Basics$not(
-				A2(_user$project$Grid$isNeighbor, right, _user$project$Grid$isAlphaNumeric)))) {
+			if (false) { //(_user$project$Grid$isAsterisk(_p14)) {
+     		    console.log('p14 :: ' + _p14);
+			}    
+			if (_user$project$Grid$isAsterisk(_p14)) {
+				return _elm_lang$core$Maybe$Just(_user$project$Grid$CircleBlack);
+			} else {
+			if (_user$project$Grid$isVertical(_p14) 
+			    //&& (_elm_lang$core$Basics$not(A2(_user$project$Grid$isNeighbor, left, _user$project$Grid$isAlphaNumeric)) 
+			    //&& _elm_lang$core$Basics$not(A2(_user$project$Grid$isNeighbor, right, _user$project$Grid$isAlphaNumeric)))
+			    ) {
 				return _elm_lang$core$Maybe$Just(_user$project$Grid$Vertical);
 			} else {
 				if (_user$project$Grid$isHorizontal(_p14) && (_elm_lang$core$Basics$not(
@@ -10362,6 +10434,7 @@ var _user$project$Grid$getElement = F3(
 					}
 				}
 			}
+			}
 		} else {
 			return _elm_lang$core$Maybe$Nothing;
 		}
@@ -10418,6 +10491,8 @@ var _user$project$Grid$drawElement = F3(
 						[
 							A3(_user$project$Grid$drawVerticalLine, x, y, model)
 						]);
+				case 'CircleBlack':
+					return A2(_user$project$Grid$drawCircleBlack, x, y);
 				case 'Intersection':
 					return A4(_user$project$Grid$drawIntersection, x, y, _p16._0, model);
 				case 'RoundCorner':
@@ -10533,7 +10608,7 @@ var _user$project$Grid$getSvg = function (model) {
 			_user$project$Grid$drawPaths(model)));
 };
 
-var _user$project$Main$arg = '\n\n+------+   +-----+   +-----+   +-----+\n|      |   |     |   |     |   |     |\n| Foo  +-->| Bar +---+ Baz |<--+ Moo |\n|      |   |     |   |     |   |     |\n+------+   +-----+   +--+--+   +-----+\n              ^         |\n              |         V\n.-------------+-----------------------.\n| Hello here and there and everywhere |\n\'-------------------------------------\'\n\n\n                        ____________\n   .--------------.     \\           \\\n  / a == b         \\     \\           \\     __________\n (    &&            )     ) process   )    \\         \\\n  \\ \'string\' ne \'\' /     /           /     / process /\n   \'--------------\'     /___________/     /_________/\n\n  User code  ^               ^ OS code\n              \\             /\n               \\        .--\'\n                \\      /\n  User code  <--- Mode ----> OS code\n                /      \\\n            .--\'        \\___\n           /                \\\n          v                  v \n       User code            OS code\n\n             .---.  .---. .---.  .---.    .---.  .---.\n    OS API   \'---\'  \'---\' \'---\'  \'---\'    \'---\'  \'---\'\n               |      |     |      |        |      |\n               v      v     |      v        |      v\n             .------------. | .-----------. |  .-----.\n             | Filesystem | | | Scheduler | |  | MMU |\n             \'------------\' | \'-----------\' |  \'-----\'\n                    |       |      |        |\n                    v       |      |        v\n                 .----.     |      |    .---------.\n                 | IO |<----\'      |    | Network |\n                 \'----\'            |    \'---------\'\n                    |              |         |\n                    v              v         v\n             .---------------------------------------.\n             |                  HAL                  |\n             \'---------------------------------------\'\n             \n\n   ____[]\n  | ___ |\n  ||   ||  device\n  ||___||  loads\n  | ooo |----------------------------------------------------------.\n  | ooo |    |                          |                          |\n  | ooo |    |                          |                          |\n  \'_____\'    |                          |                          |\n             |                          |                          |\n             v                          v                          v\n   .-------------------.  .---------------------------.  .-------------------.\n   | Loadable module C |  |     Loadable module A     |  | Loadable module B |\n   \'-------------------\'  |---------------------------|  |   (instrumented)  |\n             |            |         .-----.           |  \'-------------------\'\n             \'------------+-------->| A.o |           |             |\n                 calls    |         \'-----\'           |             |\n                          |    .------------------.   |             |\n                          |   / A.instrumented.o /<---+-------------\'\n                          |  \'------------------\'     |    calls\n                          \'---------------------------\'   \n\n\n                                        .--> Base::Class::Derived_A\n                                       /\n                                      .----> Base::Class::Derived_B    \n      Something -------.             /         \\\n                        \\           /           \\---> Base::Class::Derived\n      Something::else    \\         /             \\\n            \\             \\       /               \'--> Base::Class::Derived\n             \\             \\     /\n              \\             \\   .-----------> Base::Class::Derived_C \n               \\             \\ /\n                \'------ Base::Class\n                       /  \\ \\ \\\n                      \'    \\ \\ \\  \n                      |     \\ \\ \\\n                      .      \\ \\ \'--- The::Latest\n                     /|       \\ \\      \\\n With::Some::fantasy  \'        \\ \\      \'---- The::Latest::Greatest\n                     /|         \\ \\\n         More::Stuff  \'          \\ \'- I::Am::Running::Out::Of::Ideas\n                     /|           \\\n         More::Stuff  \'            \\\n                     /              \'--- Last::One\n         More::Stuff \n\n  Safety\n    ^\n    |                       *Rust\n    |           *Java\n    | *Python\n    |                        *C++\n    +-----------------------------> Control\n\n\n\n\n\n  TODO:\n\n   \n\n        |   \\/   \n       -+-  /\\      \n        |   \n        \n        |      |    |      |\n        +--  --+    +--  --+   +--  --+\n                    |      |   |      |\n\n                     |    |  |     |\n             .- -.   .-  -.  ._   _.\n             |   |\n\n        .-   -.  .-.       \n        \'-   -\'  | |  | |  \n                      \'-\'\n\n      \\      |    /  |\n       .     \'   \'   .\n       |    /    |    \\ \n\n       \\\n       /\n\n       /\n       \\\n\n\n       /      \\\n      \'--    --\'\n     /          \\\n\n       /   \\\n    --\'     \'--\n     /       \\\n\n                       \\         /\n       --.--  --.--   --.--   --.--\n        /        \\     \n\n\n        |   |\n        .   .\n       /|   |\\ \n\n        |\n        .\n       / \\\n\n       \\|/\n        .\n       /|\\\n\n       \n       \\|/\n      --.--\n       /|\\\n\n       \\|/\n      --+--\n       /|\\\n        \n        |/  \\|\n        .    .\n        |    |\n\n\n       -.  -.\n       /     \\\n\n        .-  .-\n       /     \\\n\n      \n       /   /     \\    \\\n      \'-  \'_     _\'   -\'\n       \n\n       .-.\n      (   )\n       \'-\'\n\n       ..\n      (  )\n       \'\'\n\n\n       .------.\n      (        )\n       \'------\'\n\n        ________  \n       /       /\n      /       /\n     /_______/\n\n\n        ________  \n        \\       \\\n         \\       \\\n          \\_______\\\n\n       ________ \n      |________|\n\n\n       ________ \n      |        |\n      |________|\n\n      .-.\n      \'-\'\n\n        ________  \n        \\_______\\\n\n       /\\\n      /  \\\n     /____\\\n\n       /\\\n      /  \\\n     /    \\\n    \'------\'\n\n       ___\n      /   \\\n      \\___/\n\n      ______\n     /      \\\n    /        \\\n    \\        /\n     \\______/\n        \n\n        +---------+\n        |         |                        +--------------+\n        |   NFS   |--+                     |              |\n        |         |  |                 +-->|   CacheFS    |\n        +---------+  |   +----------+  |   |  /dev/hda5   |\n                     |   |          |  |   +--------------+\n        +---------+  +-->|          |  |\n        |         |      |          |--+\n        |   AFS   |----->| FS-Cache |\n        |         |      |          |--+\n        +---------+  +-->|          |  |\n                     |   |          |  |   +--------------+\n        +---------+  |   +----------+  |   |              |\n        |         |  |                 +-->|  CacheFiles  |\n        |  ISOFS  |--+                     |  /var/cache  |\n        |         |                        +--------------+\n        +---------+\n    ';
+var _user$project$Main$arg = '';
 var _user$project$Main$textContentDecoder = A2(
 	_elm_lang$core$Json_Decode$at,
 	_elm_lang$core$Native_List.fromArray(
@@ -10603,28 +10678,11 @@ var _user$project$Main$view = function (model) {
 				A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						A2(
-						_elm_lang$html$Html$button,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Events$onClick(_user$project$Main$Convert)
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html$text('Convert >>')
-							]))
-					])),
-				A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
 					[
 						_elm_lang$html$Html_Attributes$style(
 						_elm_lang$core$Native_List.fromArray(
 							[
-								{ctor: '_Tuple2', _0: 'width', _1: '500px'},
+								{ctor: '_Tuple2', _0: 'width', _1: '900px'},
 								{ctor: '_Tuple2', _0: 'height', _1: '100%'},
 								{ctor: '_Tuple2', _0: 'overflow', _1: 'auto'}
 							]))
