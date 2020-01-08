@@ -1,6 +1,7 @@
 # a2s
 
 https://github.com/strukovsv/a2s
+https://strukovsv.blogspot.com/2020/01/a2s.html
 
 ascii2svg JavaScript
 
